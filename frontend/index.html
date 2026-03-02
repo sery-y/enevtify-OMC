@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <title>EVENTIFY</title>
 </head>
 <body>
@@ -35,19 +36,19 @@
             <p class="time-text">Our event is in :</p>
             <div class="countdown">
                 <div class="box">
-                    <h2 id="days">09</h2>
+                    <h3 id="days">09</h3>
                     <p>Days</p>
                 </div>
                 <div class="box">
-                    <h2 id="hours">20</h2>
+                    <h3 id="hours">20</h3>
                     <p>Hours</p>
                 </div>
                 <div class="box">
-                    <h2 id="minutes">30</h2>
+                    <h3 id="minutes">30</h3>
                     <p>Minutes</p>
                 </div>
                 <div class="box">
-                    <h2 id="seconds">07</h2>
+                    <h3 id="seconds">07</h3>
                     <p>Seconds</p>
                 </div>
             </div>
@@ -56,8 +57,154 @@
             <a href="#">Register now</a>
         </div>
     </section>
+    <script src="script.js"></script>
+<!--suite-->
 
+    <section class="about">
+        <div class="container">
+            <h2>About the event</h2>
+            <p class="about-text">
+                Join us for an inspiring and dynamic event designed to bring passionate minds together.<br><br>
+                This experience offers participants the opportunity to learn, collaborate, and challenge themselves in a motivating environment.<br><br>
+                Whether you are looking to expand your network, gain new skills, or simply be part of an energetic community, this event is the perfect place to start.
+            </p>
+        <h2 class="roles-title">Roles & participation</h2>
 
+        <div class="roles-timeline">
 
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <h3>Participant</h3>
+                    <p>Engage in challenges, work solo or in a team, submit your work, and earn badges or recognition.</p>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <h3>Staff</h3>
+                    <p>Support the event operations behind the scenes, ensure everything runs smoothly, and help participants as needed.</p>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <h3>Mentor</h3>
+                    <p>Provide guidance, answer questions, and offer advice to help participants succeed in their tasks.</p>
+                </div>
+            </div>
+
+        </div>
+
+            <h2>How it works?</h2>
+            <p class="how-text">
+                Choose how you want to be involved: whether you want to compete as a participant, guide others as a mentor or support the event operations as staff.<br>
+                Each role comes with its own responsibilities and ways to contribute, ensuring everyone can make an impact.
+            </p>
+
+            <h2>Event agenda</h2>
+
+            <div class="agenda-wrapper">
+
+                <div class="agenda-item">
+                    <strong>Day 01:</strong> Kickoff & Setup
+                </div>
+
+                <div class="agenda-item">
+                    <strong>Day 02:</strong> Work & Collaboration
+                </div>
+
+                <div class="agenda-item">
+                    <strong>Day 03:</strong> Final Submission & Closing
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section class="register">
+        <div class="container">
+            <h2>Register now</h2>
+
+            <div class="progress">
+                <div class="step active">1</div>
+                <div class="step">2</div>
+                <div class="step">3</div>
+            </div>
+
+            <form class="register-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>First Name :</label>
+                        <input type="text" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name :</label>
+                        <input type="text" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Email :</label>
+                    <input type="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Phone number :</label>
+                    <input type="tel" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Discord username :</label>
+                    <input type="text" required>
+                </div>
+
+                <div class="form-group">
+                    <label>University :</label>
+                    <input type="text">
+                </div>
+
+                <div class="form-group">
+                    <label>Field of Study / Current Position :</label>
+                    <input type="text">
+                </div>
+
+                <div class="form-group">
+                    <label>Role selection :</label>
+                    <select required>
+                        <option value="">Select your role</option>
+                        <option value="participant">Participant</option>
+                        <option value="staff">Staff</option>
+                        <option value="mentor">Mentor</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-register">Next</button>            
+            </form>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-container">
+
+        <div class="footer-left">
+            <img src="images/OMC.png" alt="logo">
+            <span>Eventify</span>
+        </div>
+
+        <div class="footer-center">
+            <a href="#">OMC website</a>
+        </div>
+
+        <div class="footer-right">
+            <a href="#"><i class="fab fa-discord"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-github"></i></a>
+        </div>
+        </div>
+    </footer>
+    <script src="https://kit.fontawesome.com/your-kit-id.js" crossorigin="anonymous"></script>
 </body>
 </html>
