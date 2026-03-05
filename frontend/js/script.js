@@ -273,4 +273,6 @@ document.getElementById("submitFinal").addEventListener("click", function () {
     alert("Registration submitted successfully ✔");
     location.reload();
 });
+
+
 });
