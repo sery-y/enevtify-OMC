@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <!-- Meta -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Event Management</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="../css/eventManger.css">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+
+
+<body>
+    <button class="menu-btn" id="menuBtn">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+    <header id="sidebar">
+        <div class="logo">
+            <img src="../images/OMC.png" alt="logo">
+            <h1>Eventify</h1>
+        </div>
+        <ul class="links-ul">
+            <li><a class="active">Event management</a> </li>
+            <li><a href="registrations.html">Registrations</a></li>
+            <li><a href="users.html">Users list</a></li>
+            <li><a href="logout.html">Logout</a></li>
+        </ul>
+    </header>
+    <main class="dashboard">
+        <div class="event-container">
+            <div class="event-overview">
+                <h2>Event Overview</h2>
+                <p>
+                    <strong>Event Name:</strong> Ideathon
+                </p>
+                <p>
+                    <strong>Description:</strong> ************
+                </p>
+                <p>
+                    <strong>Date & time:</strong> 06/03/2026 , 17h
+                </p>
+                <p>
+                    <strong>Number of days:</strong> 3 days
+                </p>
+                <div class="event-buttons">
+                    <button class="btn edit-btn">
+                        Edit event
+                    </button>
+                    <button class="btn delete-btn">
+                        Delete event
+                    </button>
+                </div>
+            </div>
+            <button class="create-btn" id="createBtn">
+                + Create event
+            </button>
+            <div class="create-form" id="createForm">
+                <h3>Create event</h3>
+                <label>Event day</label>
+                <input type="date">
+                <label>Event time</label>
+                <input type="time">
+                <label>Event type</label>
+                <select>
+                    <option>External</option>
+                    <option>Internal</option>
+                </select>
+                <label>Max number of participant</label>
+                <input type="number">
+                <label>Max number of staff</label>
+                <input type="number">
+                <label>Max number of mentor</label>
+                <input type="number">
+                <h4>Agenda</h4>
+                <label>Number of days</label>
+                <input type="number">
+                <inputtype="text"placeholder="Day 01 title">
+                <textarea placeholder="Day 01 description"></textarea>
+                <button class="btn save-btn">
+                    Save event
+                </button>
+            </div>
+        </div>
+    </main>
+    <script src="../js/admin.js"></script>
+    <script src="../js/eventManager.js"></script
+</body>
+
+</html>

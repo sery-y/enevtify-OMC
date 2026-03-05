@@ -1,0 +1,80 @@
+.event-container {
+    max-width: 900px;
+    margin: auto;
+    padding: 40px;
+}
+
+.event-overview {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    margin-bottom: 40px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.event-overview h2 {
+    color: #6c8edb;
+    margin-bottom: 20px;
+}
+
+.event-overview p {
+    margin-bottom: 12px;
+    font-size: 16px;
+}
+.event-buttons {
+    margin-top: 20px;
+    display: flex;
+    gap: 20px;
+}
+
+.btn {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    background: #b9c7e0;
+}
+
+.create-btn {
+    display: block;
+    margin: 40px auto;
+    padding: 15px 40px;
+    background: #b9c7e0;
+    border: none;
+    border-radius: 14px;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.create-form {
+    display: none;
+    background: white;
+    padding: 35px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+.create-form h3 {
+    margin-bottom: 20px;
+}
+.create-form label {
+    display: block;
+    margin-top: 15px;
+    font-weight: 500;
+}
+.create-form input,
+.create-form select,
+.create-form textarea {
+    width: 100%;
+    padding: 12px;
+    margin-top: 6px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+}
+
+
+
+.save-btn {
+    margin-top: 20px;
+    background: #3373bd;
+    color: white;
+}
