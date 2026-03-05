@@ -224,49 +224,53 @@ document.addEventListener("DOMContentLoaded", function () {
         else if (currentRole === "staff")  { show(form4); setStep(1); }
     });
     //submit
-     document.getElementById("submitFinal").addEventListener("click", function () {
-        const payload = {
-            firstName: sanitizeString(document.getElementById("firstName").value, { maxLen: 80 }),
-            lastName: sanitizeString(document.getElementById("lastName").value, { maxLen: 80 }),
-            email: sanitizeEmail(document.getElementById("emailInput").value),
-            phone: sanitizePhone(document.getElementById("phone").value),
-            discordUsername: sanitizeString(document.getElementById("discordUsername").value, { maxLen: 64 }),
-            university: sanitizeString(document.getElementById("university").value, { maxLen: 120 }),
-            fieldOfStudy: sanitizeString(document.getElementById("fieldOfStudy").value, { maxLen: 120 }),
-            role: sanitizeString(roleSelect.value, { maxLen: 20 })
-        };
+document.getElementById("submitFinal").addEventListener("click", function () {
 
-        if (payload.university === "") delete payload.university;
-        if (payload.fieldOfStudy === "") delete payload.fieldOfStudy;
+    const payload = {
+        firstName: sanitizeString(document.getElementById("firstName").value, { maxLen: 80 }),
+        lastName: sanitizeString(document.getElementById("lastName").value, { maxLen: 80 }),
+        email: sanitizeEmail(document.getElementById("emailInput").value),
+        phone: sanitizePhone(document.getElementById("phone").value),
+        discordUsername: sanitizeString(document.getElementById("discordUsername").value, { maxLen: 64 }),
+        university: sanitizeString(document.getElementById("university").value, { maxLen: 120 }),
+        fieldOfStudy: sanitizeString(document.getElementById("fieldOfStudy").value, { maxLen: 120 }),
+        role: sanitizeString(roleSelect.value, { maxLen: 20 }),
+        registrationDate: new Date().toLocaleDateString()
+    };
 
-        if (currentRole === "participant") {
-            payload.teamName = sanitizeString(document.getElementById("teamName").value, { maxLen: 80 });
-            payload.tools = sanitizeString(document.getElementById("tools").value, { maxLen: 200 });
-            payload.motivation = sanitizeString(document.getElementById("motivation").value, { maxLen: 300 });
-            payload.expectations = sanitizeString(document.getElementById("expectations").value, { maxLen: 300 });
-            payload.mainSkills = sanitizeString(document.getElementById("mainSkills").value, { maxLen: 200 });
-            payload.skillLevel = sanitizeString(document.getElementById("skillLevelSelect").value, { maxLen: 20 });
 
-            if (payload.teamName === "") delete payload.teamName;
-            if (payload.expectations === "") delete payload.expectations;
-            if (payload.mainSkills === "") delete payload.mainSkills;
-        } else if (currentRole === "mentor") {
-            payload.yearsExperience = sanitizeString(document.getElementById("yearsExperience").value, { maxLen: 40 });
-            payload.linkedin = sanitizeString(document.getElementById("linkedin").value, { maxLen: 200 });
-            payload.portfolio = sanitizeString(document.getElementById("portfolio").value, { maxLen: 200 });
-            payload.expertiseArea = sanitizeString(document.getElementById("expertiseArea").value, { maxLen: 120 });
-            payload.masteredTools = sanitizeString(document.getElementById("masteredTools").value, { maxLen: 200 });
-            payload.mentoredBefore = sanitizeString(document.querySelector('input[name="mentored"]:checked')?.value, { maxLen: 10 });
-            payload.availability = sanitizeString(document.getElementById("availabilityMentor").value, { maxLen: 120 });
+    /* ===== Role specific data ===== */
 
-            if (payload.portfolio === "") delete payload.portfolio;
-            if (payload.expertiseArea === "") delete payload.expertiseArea;
-            if (payload.masteredTools === "") delete payload.masteredTools;
-        } else if (currentRole === "staff") {
-            payload.preferredRole = sanitizeString(document.getElementById("preferredRole").value, { maxLen: 120 });
-            payload.organizedBefore = sanitizeString(document.getElementById("organizedBefore").value, { maxLen: 10 }).toLowerCase();
-            payload.availability = sanitizeString(document.getElementById("availabilityStaff").value, { maxLen: 120 });
-        }
-            
-    });
+    if (currentRole === "participant") {
+
+        payload.teamName = sanitizeString(document.getElementById("teamName").value, { maxLen: 80 });
+        payload.tools = sanitizeString(document.getElementById("tools").value, { maxLen: 200 });
+        payload.motivation = sanitizeString(document.getElementById("motivation").value, { maxLen: 300 });
+        payload.expectations = sanitizeString(document.getElementById("expectations").value, { maxLen: 300 });
+        payload.mainSkills = sanitizeString(document.getElementById("mainSkills").value, { maxLen: 200 });
+        payload.skillLevel = sanitizeString(document.getElementById("skillLevelSelect").value, { maxLen: 20 });
+
+    }
+    else if (currentRole === "mentor") {
+        payload.yearsExperience = sanitizeString(document.getElementById("yearsExperience").value, { maxLen: 40 });
+        payload.portfolio = sanitizeString(document.getElementById("portfolio").value, { maxLen: 200 });
+        payload.expertiseArea = sanitizeString(document.getElementById("expertiseArea").value, { maxLen: 120 });
+        payload.masteredTools = sanitizeString(document.getElementById("masteredTools").value, { maxLen: 200 });
+        payload.mentoredBefore = sanitizeString(document.querySelector('input[name="mentored"]:checked')?.value || "", { maxLen: 10 });
+        payload.availability = sanitizeString(document.getElementById("availabilityMentor").value, { maxLen: 120 });
+
+    }
+    else if (currentRole === "staff") {
+
+        payload.preferredRole = sanitizeString(document.getElementById("preferredRole").value, { maxLen: 120 });
+        payload.organizedBefore = sanitizeString(document.getElementById("organizedBefore").value, { maxLen: 10 });
+        payload.availability = sanitizeString(document.getElementById("availabilityStaff").value, { maxLen: 120 });
+
+    }
+    let registrations = JSON.parse(localStorage.getItem("registrations")) || [];
+    registrations.push(payload);
+    localStorage.setItem("registrations", JSON.stringify(registrations));
+    alert("Registration submitted successfully ✔");
+    location.reload();
+});
 });
