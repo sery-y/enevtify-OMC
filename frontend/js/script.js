@@ -64,6 +64,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
 startCountdown();
 
+// Check registration form status
+async function checkFormStatus() {
+    try {
+        const res = await fetch("http://127.0.0.1:8000/api/registration/form-status");
+        const data = await res.json();
+        
+        if (data.status !== "open") {
+            document.querySelector(".registration-form").innerHTML = `
+                <div style="padding: 20px; text-align: center; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px;">
+                    <h2>${data.status === "not_open" ? "Form Not Open Yet" : "Registration Closed"}</h2>
+                    <p>${data.message}</p>
+                </div>
+            `;
+        }
+    } catch (err) {
+        console.error("Error checking form status:", err);
+    }
+}
+
+checkFormStatus();
+
 const roleSelect = document.getElementById("roleSelect");
 const discordInput = document.getElementById("discordUsername");
 

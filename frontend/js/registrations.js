@@ -7,9 +7,9 @@ let registrations = []
 // =============================
 // LOAD DATA FROM BACKEND
 // =============================
-async function loadRegistrations(){
+async function loadRegistrations() {
 
-    try{
+    try {
 
         const res = await fetch("http://127.0.0.1:8000/api/users")
 
@@ -17,9 +17,9 @@ async function loadRegistrations(){
 
         renderRegistrations(registrations)
 
-    }catch(err){
+    } catch (err) {
 
-        console.error("Error loading registrations:",err)
+        console.error("Error loading registrations:", err)
 
     }
 
@@ -28,11 +28,11 @@ async function loadRegistrations(){
 // =============================
 // RENDER REGISTRATIONS
 // =============================
-function renderRegistrations(data){
+function renderRegistrations(data) {
 
     list.innerHTML = ""
 
-    data.forEach((user)=>{
+    data.forEach((user) => {
 
         const card = document.createElement("div")
 
@@ -58,15 +58,15 @@ function renderRegistrations(data){
 
         list.appendChild(card)
 
-        card.querySelector(".details-btn").addEventListener("click",()=>{
+        card.querySelector(".details-btn").addEventListener("click", () => {
             showDetails(user)
         })
 
-        card.querySelector(".approve-btn").addEventListener("click",()=>{
+        card.querySelector(".approve-btn").addEventListener("click", () => {
             card.style.borderLeft = "5px solid green"
         })
 
-        card.querySelector(".reject-btn").addEventListener("click",()=>{
+        card.querySelector(".reject-btn").addEventListener("click", () => {
             card.style.borderLeft = "5px solid red"
         })
 
@@ -75,9 +75,9 @@ function renderRegistrations(data){
 }
 
 // ROLE DETAILS
-function buildRoleDetails(user){
+function buildRoleDetails(user) {
 
-    if(user.role === "STAFF"){
+    if (user.role === "STAFF") {
 
         return `
             <p>Preferred role</p>
@@ -91,7 +91,7 @@ function buildRoleDetails(user){
         `
     }
 
-    if(user.role === "MENTOR"){
+    if (user.role === "MENTOR") {
 
         return `
             <p>Years of experience</p>
@@ -123,7 +123,7 @@ function buildRoleDetails(user){
 
 
 // SHOW USER DETAILS
-function showDetails(user){
+function showDetails(user) {
 
     detailsBox.style.display = "block"
 
@@ -168,16 +168,24 @@ function showDetails(user){
     `
 }
 
+detailsBox.querySelector(".approve-btn").addEventListener("click", () => {
+    detailsBox.style.borderLeft = "5px solid green";
+});
 
-roleFilter.addEventListener("change",()=>{
+detailsBox.querySelector(".reject-btn").addEventListener("click", () => {
+    detailsBox.style.borderLeft = "5px solid red";
+});
+
+
+roleFilter.addEventListener("change", () => {
 
     const role = roleFilter.value
 
-    if(role === "all"){
+    if (role === "all") {
 
         renderRegistrations(registrations)
 
-    }else{
+    } else {
 
         const filtered = registrations.filter(r => r.role.toLowerCase() === role)
 
@@ -186,9 +194,9 @@ roleFilter.addEventListener("change",()=>{
     }
 
 })
-document.addEventListener("click",(e)=>{
+document.addEventListener("click", (e) => {
 
-    if(!detailsBox.contains(e.target) && !e.target.classList.contains("details-btn")){
+    if (!detailsBox.contains(e.target) && !e.target.classList.contains("details-btn")) {
 
         detailsBox.style.display = "none"
 
