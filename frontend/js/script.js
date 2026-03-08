@@ -96,10 +96,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const form3   = document.getElementById("form3");
     const form4   = document.getElementById("form4");
     const final   = document.getElementById("final");
+    const otpForm = document.getElementById("otpForm");
 
     const steps = document.querySelectorAll(".step");
 
     let currentRole = "participant";
+    let registrationPayload = null;
 
     document.querySelectorAll("input, select").forEach(field => {
         field.addEventListener("input", function () {
@@ -110,30 +112,29 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 
-    // Fake allowlist (replace with real backend check later)
-    const clubMembers = [
-        "member1@omc.com",
-        "member2@omc.com",
-        "mentor@omc.com",
-        "member@gmail.com"
-    ];
+    // Discord ID to role mapping (replace with real Discord API integration later)
+    const discordRoleMapping = {
+        "user123": "staff",
+        "mentor456": "mentor", 
+        "staff789": "staff",
+        "admin999": "mentor"
+        // Add more Discord ID to role mappings as needed
+    };
 
-    // ===== Email → unlock roles =====
-    emailInput.addEventListener("blur", function () {
-        const email = sanitizeEmail(emailInput.value);
-        const isMember = clubMembers.includes(email);
+    // ===== Discord Username → determine role =====
+    const discordInput = document.getElementById("discordUsername");
+    discordInput.addEventListener("blur", function () {
+        const discordId = sanitizeString(discordInput.value);
+        const mappedRole = discordRoleMapping[discordId] || "participant";
 
-        roleSelect.innerHTML = `<option value="participant">Participant</option>`;
-        if (isMember) {
-            roleSelect.innerHTML += `
-                <option value="mentor">Mentor</option>
-                <option value="staff">Staff</option>
-            `;
-        }
+        roleSelect.innerHTML = `<option value="${mappedRole}">${mappedRole.charAt(0).toUpperCase() + mappedRole.slice(1)}</option>`;
+        
+        // Update currentRole
+        currentRole = mappedRole;
     });
 
     function hideAll() {
-        [form1, form2, form3, form4, final].forEach(f => f.style.display = "none");
+        [form1, form2, form3, form4, final, otpForm].forEach(f => f.style.display = "none");
     }
 
     function show(el) {
@@ -248,6 +249,52 @@ document.addEventListener("DOMContentLoaded", function () {
         else if (currentRole === "mentor") { show(form3); setStep(1); }
         else if (currentRole === "staff")  { show(form4); setStep(1); }
     });
+
+    // OTP back button
+    document.getElementById("backOtp").addEventListener("click", function () {
+        hideAll();
+        show(final);
+        setStep(2);
+    });
+
+    // OTP verification
+    document.getElementById("verifyOtp").addEventListener("click", function () {
+        const otpInputs = ["otp1", "otp2", "otp3", "otp4", "otp5", "otp6"];
+        const enteredOtp = otpInputs.map(id => document.getElementById(id).value).join("");
+        const correctOtp = localStorage.getItem("currentOtp");
+
+        if (enteredOtp === correctOtp && registrationPayload) {
+            // Save registration
+            let registrations = JSON.parse(localStorage.getItem("registrations")) || [];
+            registrations.push(registrationPayload);
+            localStorage.setItem("registrations", JSON.stringify(registrations));
+            
+            // Clear OTP
+            localStorage.removeItem("currentOtp");
+            
+            alert("Registration completed successfully! Welcome to Eventify! ✔");
+            
+            // Redirect to admin dashboard (assuming admin.html exists)
+            window.location.href = "admin.html";
+        } else {
+            alert("Invalid OTP. Please try again.");
+        }
+    });
+
+    // Auto-focus OTP inputs
+    document.querySelectorAll(".otp-input").forEach((input, index) => {
+        input.addEventListener("input", function() {
+            if (this.value.length === 1 && index < 5) {
+                document.getElementById(`otp${index + 2}`).focus();
+            }
+        });
+        
+        input.addEventListener("keydown", function(e) {
+            if (e.key === "Backspace" && this.value.length === 0 && index > 0) {
+                document.getElementById(`otp${index}`).focus();
+            }
+        });
+    });
     //submit
 document.getElementById("submitFinal").addEventListener("click", function () {
 
@@ -305,11 +352,18 @@ document.getElementById("submitFinal").addEventListener("click", function () {
             .join(", ");
     }
 
-    let registrations = JSON.parse(localStorage.getItem("registrations")) || [];
-    registrations.push(payload);
-    localStorage.setItem("registrations", JSON.stringify(registrations));
-    alert("Registration submitted successfully ✔");
-    location.reload();
+    // Store payload for OTP verification
+    registrationPayload = payload;
+
+    // Show OTP form
+    hideAll();
+    show(otpForm);
+    setStep(2);
+
+    // Generate and "send" OTP (in real app, this would be sent via email)
+    const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    console.log("Generated OTP:", generatedOtp); // In real app, this would be sent to user's email
+    localStorage.setItem("currentOtp", generatedOtp);
 });
 
 

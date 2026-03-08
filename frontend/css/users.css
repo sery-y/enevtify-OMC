@@ -77,7 +77,32 @@
 .user-details h3{
     margin-bottom:28px;
 }
+.links-ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
 
+.links-ul li a {
+    display: block;
+    text-decoration: none;
+    color: #333;
+    font-size: 16px;
+    padding: 12px 15px;
+    border-radius: 10px;
+    transition: 0.2s;
+}
+
+.links-ul li a:hover {
+    background: #5389DA4F;
+    color: white;
+}
+
+.links-ul li a.active {
+    background: #3373bd;
+    color: white;
+}
 .details-grid{
     display:grid;
     grid-template-columns:1fr 1fr;
