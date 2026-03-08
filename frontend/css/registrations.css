@@ -1,44 +1,53 @@
 .registrations-container{
-    max-width:950px;
+    max-width:1000px;
+    width:100%;
     margin:auto;
     padding:50px 40px;
 }
 
 .filter-box{
     background:white;
-    padding:20px 26px;
+    padding:18px 26px;
     border-radius:16px;
     display:flex;
     justify-content:space-between;
     align-items:center;
     margin-bottom:35px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.05);
+    border:1px solid #e8edff;
+    box-shadow:0 8px 20px rgba(0,0,0,0.05);
 }
 
 .filter-box span{
-    font-weight:500;
+    font-weight:600;
+    color:#333;
 }
+
 .filter-box select{
-    border:none;
-    font-size:15px;
+    border:1px solid #dfe6ff;
+    padding:6px 12px;
+    border-radius:8px;
+    font-size:14px;
     cursor:pointer;
     outline:none;
 }
+
 .registration-card{
     background:white;
     padding:22px 28px;
-    border-radius:18px;
+    border-radius:16px;
     display:grid;
-    grid-template-columns: 1fr 1fr auto;
+    grid-template-columns:2fr 2fr auto;
     align-items:center;
-    margin-bottom:18px;
-    box-shadow:0 12px 30px rgba(0,0,0,0.05);
     gap:20px;
+    margin-bottom:16px;
+    border:1px solid #eef1ff;
+    transition:all .25s ease;
+    box-shadow:0 8px 20px rgba(0,0,0,0.05);
 }
 
 .registration-card:hover{
-    transform:translateY(-4px);
-    box-shadow:0 18px 40px rgba(0,0,0,0.08);
+    transform:translateY(-3px);
+    box-shadow:0 15px 35px rgba(0,0,0,0.08);
 }
 
 .reg-info{
@@ -49,22 +58,23 @@
 .reg-info p{
     font-size:14px;
     margin:3px 0;
+    color:#444;
 }
 
 .reg-actions{
     display:flex;
     align-items:center;
-    gap:12px;
+    gap:10px;
 }
 
 .approve-btn{
-    border:1px solid #5389DA;
+    border:1px solid #27ae60;
     background:white;
     color:#27ae60;
     padding:8px 18px;
-    border-radius:12px;
+    border-radius:10px;
     cursor:pointer;
-    font-size:14px;
+    font-size:13px;
     transition:0.2s;
 }
 
@@ -72,16 +82,14 @@
     background:#eaf7ef;
 }
 
-
-
 .reject-btn{
-    border:1px solid #5389DA;
+    border:1px solid #e74c3c;
     background:white;
     color:#e74c3c;
     padding:8px 18px;
-    border-radius:12px;
+    border-radius:10px;
     cursor:pointer;
-    font-size:14px;
+    font-size:13px;
     transition:0.2s;
 }
 
@@ -89,81 +97,74 @@
     background:#fdeaea;
 }
 
-
-
 .details-btn{
-    background:none;
+    background:#eef3ff;
     border:none;
-    color:#777;
-    font-size:14px;
+    padding:6px 12px;
+    border-radius:8px;
+    color:#3373bd;
+    font-size:13px;
     cursor:pointer;
+    transition:.2s;
+}
 
+.details-btn:hover{
+    background:#3373bd;
+    color:white;
 }
 
 .user-details{
     background:white;
     padding:40px;
     border-radius:20px;
-    margin-top:45px;
+    margin-top:40px;
+    border:1px solid #e8edff;
     box-shadow:0 15px 40px rgba(0,0,0,0.06);
     display:none;
 }
-.links-ul {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-}
-
-.links-ul li a {
-    display: block;
-    text-decoration: none;
-    color: #333;
-    font-size: 16px;
-    padding: 12px 15px;
-    border-radius: 10px;
-    transition: 0.2s;
-}
-
-.links-ul li a:hover {
-    background: #5389DA4F;
-    color: white;
-}
-
-.links-ul li a.active {
-    background: #3373bd;
-    color: white;
-}
-
 
 .user-details h3{
-    margin-bottom:28px;
+    margin-bottom:25px;
 }
 
 .details-grid{
     display:grid;
     grid-template-columns:1fr 1fr;
+
     gap:16px;
+
     font-size:15px;
+
+    color:#444;
 }
 
 .details-actions{
     margin-top:30px;
+
     display:flex;
+
     gap:16px;
 }
 
-
-
 @media (max-width:768px){
-    .registration-card{
-        flex-direction:column;
-        align-items:flex-start;
-        gap:15px;
-
-    }
-    .details-grid{
-        grid-template-columns:1fr;
-
-    }
+.registrations-container{
+    padding:30px 20px;
+}
+.registration-card{
+    grid-template-columns:1fr;
+    gap:10px;
+}
+.reg-actions{
+    justify-content:flex-start;
+}
+.details-grid{
+    grid-template-columns:1fr;
+}
+.details-actions{
+    flex-direction:column;
+}
+.approve-btn,
+.reject-btn{
+    width:100%;
+}
 }
