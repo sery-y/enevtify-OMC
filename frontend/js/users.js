@@ -2,7 +2,33 @@ const usersList = document.getElementById("usersList");
 const userDetailsBox = document.getElementById("userDetails");
 const userRoleFilter = document.getElementById("userRoleFilter");
 
-let allUsers = JSON.parse(localStorage.getItem("registrations")) || [];
+let allUsers = [];
+
+// Load users from API
+async function loadUsers() {
+    try {
+        const token = localStorage.getItem("token");
+        const res = await fetch("http://127.0.0.1:8000/api/users", {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (!res.ok) {
+            console.error("Failed to load users");
+            usersList.innerHTML = "<p>Error loading users</p>";
+            return;
+        }
+
+        allUsers = await res.json();
+        renderUsers(allUsers);
+    } catch (err) {
+        console.error("Error loading users:", err);
+        usersList.innerHTML = "<p>Error loading users</p>";
+    }
+}
 
 function renderUsers(data) {
     usersList.innerHTML = "";
@@ -26,8 +52,8 @@ function renderUsers(data) {
         const row = document.createElement("div");
         row.className = "user-row";
         row.innerHTML = `
-            <span>${user.lastName || "-"}</span>
-            <span>${user.firstName || "-"}</span>
+            <span>${user.last_name || "-"}</span>
+            <span>${user.first_name || "-"}</span>
             <span>${user.role || "-"}</span>
             <button class="details-link">View details</button>
         `;
@@ -39,25 +65,25 @@ function renderUsers(data) {
 }
 
 function buildRoleSpecificDetails(user) {
-    if (user.role === "staff") {
+    if (user.role === "STAFF") {
         return `
             <p>Preferred role</p>
-            <p>${user.preferredRole || "-"}</p>
+            <p>${user.preferred_role || "-"}</p>
             <p>Organized before</p>
-            <p>${user.organizedBefore || "-"}</p>
+            <p>${user.organized_before || "-"}</p>
             <p>Availability</p>
             <p>${user.availability || "-"}</p>
         `;
     }
 
-    if (user.role === "mentor") {
+    if (user.role === "MENTOR") {
         return `
             <p>Years of experience</p>
-            <p>${user.yearsExperience || "-"}</p>
+            <p>${user.years_of_experience || "-"}</p>
             <p>Expertise area</p>
-            <p>${user.expertiseArea || "-"}</p>
+            <p>${user.area_of_expertise || "-"}</p>
             <p>Mentored before</p>
-            <p>${user.mentoredBefore || "-"}</p>
+            <p>${user.mentored_before || "-"}</p>
             <p>Availability</p>
             <p>${user.availability || "-"}</p>
         `;
@@ -66,11 +92,11 @@ function buildRoleSpecificDetails(user) {
     // participant
     return `
         <p>Team name</p>
-        <p>${user.teamName || "-"}</p>
+        <p>${user.team || "-"}</p>
         <p>Main skills</p>
-        <p>${user.mainSkills || "-"}</p>
+        <p>${user.main_skills || "-"}</p>
         <p>Skill level</p>
-        <p>${user.skillLevel || "-"}</p>
+        <p>${user.skill_level || "-"}</p>
     `;
 }
 
@@ -80,17 +106,17 @@ function showUserDetails(user) {
         <h3>User details</h3>
         <div class="details-grid">
             <p>First Name</p>
-            <p>${user.firstName || "-"}</p>
+            <p>${user.first_name || "-"}</p>
             <p>Last Name</p>
-            <p>${user.lastName || "-"}</p>
+            <p>${user.last_name || "-"}</p>
             <p>Email</p>
             <p>${user.email || "-"}</p>
             <p>Discord username</p>
-            <p>${user.discordUsername || "-"}</p>
+            <p>${user.discord_username || "-"}</p>
             <p>University</p>
             <p>${user.university || "-"}</p>
             <p>Field of study</p>
-            <p>${user.fieldOfStudy || "-"}</p>
+            <p>${user.field_of_study || "-"}</p>
             <p>Role</p>
             <p>${user.role || "-"}</p>
             ${buildRoleSpecificDetails(user)}
@@ -107,7 +133,7 @@ userRoleFilter.addEventListener("change", () => {
     if (role === "all") {
         renderUsers(allUsers);
     } else {
-        renderUsers(allUsers.filter((u) => u.role === role));
+        renderUsers(allUsers.filter((u) => u.role.toUpperCase() === role.toUpperCase()));
     }
 });
 
@@ -121,5 +147,8 @@ document.addEventListener("click", (e) => {
     }
 });
 
-renderUsers(allUsers);
+// Load users when page loads
+document.addEventListener("DOMContentLoaded", () => {
+    loadUsers();
+});
 

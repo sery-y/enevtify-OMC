@@ -3,29 +3,29 @@
 
 function startCountdown() {
 
-const eventDate = new Date("2026-03-10T00:00:00").getTime();
+    const eventDate = new Date("2026-03-10T00:00:00").getTime();
 
-const timer = setInterval(() => {
+    const timer = setInterval(() => {
 
-const now = new Date().getTime();
-const distance = eventDate - now;
+        const now = new Date().getTime();
+        const distance = eventDate - now;
 
-if (distance < 0) {
-clearInterval(timer);
-return;
-}
+        if (distance < 0) {
+            clearInterval(timer);
+            return;
+        }
 
-const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-document.getElementById("days").innerText = String(days).padStart(2, "0");
-document.getElementById("hours").innerText = String(hours).padStart(2, "0");
-document.getElementById("minutes").innerText = String(minutes).padStart(2, "0");
-document.getElementById("seconds").innerText = String(seconds).padStart(2, "0");
+        document.getElementById("days").innerText = String(days).padStart(2, "0");
+        document.getElementById("hours").innerText = String(hours).padStart(2, "0");
+        document.getElementById("minutes").innerText = String(minutes).padStart(2, "0");
+        document.getElementById("seconds").innerText = String(seconds).padStart(2, "0");
 
-}, 1000);
+    }, 1000);
 
 }
 
@@ -33,323 +33,394 @@ document.getElementById("seconds").innerText = String(seconds).padStart(2, "0");
 // Security / Sanitization
 function sanitizeString(value, { maxLen = 300 } = {}) {
 
-if (!value) return "";
+    if (!value) return "";
 
-let s = String(value);
+    let s = String(value);
 
-try {
-s = s.normalize("NFKC");
-} catch (e) {}
+    try {
+        s = s.normalize("NFKC");
+    } catch (e) { }
 
-s = s.trim();
-s = s.replace(/[\u0000-\u001F\u007F]/g, "");
-s = s.replace(/[<>]/g, "");
+    s = s.trim();
+    s = s.replace(/[\u0000-\u001F\u007F]/g, "");
+    s = s.replace(/[<>]/g, "");
 
-if (s.length > maxLen) s = s.slice(0, maxLen);
+    if (s.length > maxLen) s = s.slice(0, maxLen);
 
-return s;
+    return s;
 }
 
 function sanitizeEmail(value) {
-return sanitizeString(value, { maxLen: 200 }).toLowerCase();
+    return sanitizeString(value, { maxLen: 200 }).toLowerCase();
 }
 
 function sanitizePhone(value) {
-return sanitizeString(value, { maxLen: 20 }).replace(/[^0-9+\-() ]/g, "");
+    return sanitizeString(value, { maxLen: 20 }).replace(/[^0-9+\-() ]/g, "");
 }
 
 
 // MAIN SCRIPT
 document.addEventListener("DOMContentLoaded", function () {
 
-startCountdown();
+    startCountdown();
 
-// Check registration form status
-async function checkFormStatus() {
-    try {
-        const res = await fetch("http://127.0.0.1:8000/api/registration/form-status");
-        const data = await res.json();
-        
-        if (data.status !== "open") {
-            document.querySelector(".registration-form").innerHTML = `
+    // Check registration form status
+    async function checkFormStatus() {
+        try {
+            const res = await fetch("http://127.0.0.1:8000/api/registration/form-status");
+            const data = await res.json();
+
+            if (data.status !== "open") {
+                document.querySelector(".registration-form").innerHTML = `
                 <div style="padding: 20px; text-align: center; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px;">
                     <h2>${data.status === "not_open" ? "Form Not Open Yet" : "Registration Closed"}</h2>
                     <p>${data.message}</p>
                 </div>
             `;
+            }
+        } catch (err) {
+            console.error("Error checking form status:", err);
         }
-    } catch (err) {
-        console.error("Error checking form status:", err);
     }
-}
 
-checkFormStatus();
+    checkFormStatus();
+
+    // Get active event ID for shifts
+    getActiveEventId();
+
+    const roleSelect = document.getElementById("roleSelect");
+    const discordInput = document.getElementById("discordUsername");
 
-const roleSelect = document.getElementById("roleSelect");
-const discordInput = document.getElementById("discordUsername");
+    const form1 = document.getElementById("form1");
+    const form2 = document.getElementById("form2");
+    const form3 = document.getElementById("form3");
+    const form4 = document.getElementById("form4");
 
-const form1 = document.getElementById("form1");
-const form2 = document.getElementById("form2");
-const form3 = document.getElementById("form3");
-const form4 = document.getElementById("form4");
+    const final = document.getElementById("final");
+    const otpForm = document.getElementById("otpForm");
 
-const final = document.getElementById("final");
-const otpForm = document.getElementById("otpForm");
+    const steps = document.querySelectorAll(".step");
 
-const steps = document.querySelectorAll(".step");
+    let currentRole = "participant";
+    let registrationPayload = null;
+    let currentEventId = 1; // TODO: Get this from API or context
 
-let currentRole = "participant";
-let registrationPayload = null;
+    // Get current active event ID
+    async function getActiveEventId() {
+        try {
+            const res = await fetch("http://127.0.0.1:8000/api/registration/form-status");
+            const data = await res.json();
 
+            if (data.status === "open") {
+                // Fetch events and get the active one
+                const token = localStorage.getItem("token");
+                if (token) {
+                    const eventsRes = await fetch("http://127.0.0.1:8000/api/admin/events", {
+                        method: "GET",
+                        headers: {
+                            "Authorization": `Bearer ${token}`,
+                            "Content-Type": "application/json"
+                        }
+                    });
 
-// Helpers
-function hideAll() {
-[form1, form2, form3, form4, final, otpForm].forEach(f => f.style.display = "none");
-}
+                    if (eventsRes.ok) {
+                        const events = await eventsRes.json();
+                        if (events.length > 0) {
+                            currentEventId = events[0].id;
+                        }
+                    }
+                }
+            }
+        } catch (err) {
+            console.error("Error getting active event ID:", err);
+        }
+    }
 
-function show(el) {
-el.style.display = "block";
-}
+    // Load shifts based on role (STAFF or MENTOR)
+    async function loadShiftsForRole(role, eventId) {
+        try {
+            const endpoint = role === "staff"
+                ? `/api/events/${eventId}/shifts/staff`
+                : role === "mentor"
+                    ? `/api/events/${eventId}/shifts/mentors`
+                    : null;
 
-function setStep(index) {
-steps.forEach((s, i) => s.classList.toggle("active", i <= index));
-}
+            if (!endpoint) return;
 
+            const res = await fetch("http://127.0.0.1:8000" + endpoint);
 
-// Discord Check Backend
-discordInput.addEventListener("blur", async function () {
+            if (!res.ok) {
+                console.error("Failed to load shifts for role:", role);
+                return;
+            }
 
-const username = sanitizeString(discordInput.value);
+            const shifts = await res.json();
+            console.log(`Shifts for ${role}:`, shifts);
 
-if (!username) return;
+            // You can use this data to populate shift selection in the form
+            // For example: displayShiftsInForm(shifts);
 
-try {
+        } catch (err) {
+            console.error("Error loading shifts:", err);
+        }
+    }
 
-const res = await fetch("http://127.0.0.1:8000/api/registration/check-discord/" + username);
+    // Helpers
+    function hideAll() {
+        [form1, form2, form3, form4, final, otpForm].forEach(f => f.style.display = "none");
+    }
 
-const data = await res.json();
+    function show(el) {
+        el.style.display = "block";
+    }
 
-roleSelect.innerHTML = "";
+    function setStep(index) {
+        steps.forEach((s, i) => s.classList.toggle("active", i <= index));
+    }
 
-data.roles.forEach(role => {
 
-const option = document.createElement("option");
+    // Discord Check Backend
+    discordInput.addEventListener("blur", async function () {
 
-option.value = role.toLowerCase();
-option.textContent = role;
+        const username = sanitizeString(discordInput.value);
 
-roleSelect.appendChild(option);
+        if (!username) return;
 
-});
+        try {
 
-} catch (err) {
+            const res = await fetch("http://127.0.0.1:8000/api/registration/check-discord/" + username);
 
-console.error("Discord check error", err);
+            const data = await res.json();
 
-}
+            roleSelect.innerHTML = "";
 
-});
+            data.roles.forEach(role => {
 
+                const option = document.createElement("option");
 
-// Validation
-function validateForm(form) {
+                option.value = role.toLowerCase();
+                option.textContent = role;
 
-let valid = true;
+                roleSelect.appendChild(option);
 
-form.querySelectorAll(".error-msg").forEach(e => e.remove());
-form.querySelectorAll(".input-error").forEach(e => e.classList.remove("input-error"));
+            });
 
-const fields = form.querySelectorAll("input[required],select[required]");
+        } catch (err) {
 
-fields.forEach(field => {
+            console.error("Discord check error", err);
 
-if (!field.value.trim()) {
+        }
 
-field.classList.add("input-error");
+    });
 
-const err = document.createElement("span");
-err.className = "error-msg";
-err.textContent = "This field is required";
 
-field.insertAdjacentElement("afterend", err);
+    // Load shifts when role is selected
+    roleSelect.addEventListener("change", async function () {
+        const selectedRole = roleSelect.value;
+        if (selectedRole === "staff" || selectedRole === "mentor") {
+            await loadShiftsForRole(selectedRole, currentEventId);
+        }
+    });
 
-valid = false;
+    // Validation
+    function validateForm(form) {
 
-}
+        let valid = true;
 
-});
+        form.querySelectorAll(".error-msg").forEach(e => e.remove());
+        form.querySelectorAll(".input-error").forEach(e => e.classList.remove("input-error"));
 
-return valid;
+        const fields = form.querySelectorAll("input[required],select[required]");
 
-}
+        fields.forEach(field => {
 
+            if (!field.value.trim()) {
 
-// Step Navigation
-document.getElementById("next1").onclick = function () {
+                field.classList.add("input-error");
 
-if (!validateForm(form1)) return;
+                const err = document.createElement("span");
+                err.className = "error-msg";
+                err.textContent = "This field is required";
 
-currentRole = roleSelect.value;
+                field.insertAdjacentElement("afterend", err);
 
-hideAll();
+                valid = false;
 
-if (currentRole === "participant") show(form2);
-else if (currentRole === "mentor") show(form3);
-else show(form4);
+            }
 
-setStep(1);
+        });
 
-};
+        return valid;
 
+    }
 
-// Back Buttons
-["back2", "back3", "back4"].forEach(id => {
 
-document.getElementById(id).onclick = function () {
+    // Step Navigation
+    document.getElementById("next1").onclick = function () {
 
-hideAll();
-show(form1);
-setStep(0);
+        if (!validateForm(form1)) return;
 
-};
+        currentRole = roleSelect.value;
 
-});
+        hideAll();
 
+        if (currentRole === "participant") show(form2);
+        else if (currentRole === "mentor") show(form3);
+        else show(form4);
 
-// Step2 → Final
-["next2", "next3", "next4"].forEach(id => {
+        setStep(1);
 
-document.getElementById(id).onclick = function () {
+    };
 
-const form = this.closest("form");
 
-if (!validateForm(form)) return;
+    // Back Buttons
+    ["back2", "back3", "back4"].forEach(id => {
 
-hideAll();
-show(final);
-setStep(2);
+        document.getElementById(id).onclick = function () {
 
-};
+            hideAll();
+            show(form1);
+            setStep(0);
 
-});
+        };
 
+    });
 
-// Submit Registration
-document.getElementById("submitFinal").onclick = async function () {
 
-const payload = {
+    // Step2 → Final
+    ["next2", "next3", "next4"].forEach(id => {
 
-first_name: sanitizeString(document.getElementById("firstName").value),
-last_name: sanitizeString(document.getElementById("lastName").value),
-email: sanitizeEmail(document.getElementById("emailInput").value),
-phone_number: sanitizePhone(document.getElementById("phone").value),
-discord_username: sanitizeString(document.getElementById("discordUsername").value),
-university: sanitizeString(document.getElementById("university").value),
-field_of_study: sanitizeString(document.getElementById("fieldOfStudy").value),
-role: roleSelect.value.toUpperCase()
+        document.getElementById(id).onclick = function () {
 
-};
+            const form = this.closest("form");
 
-registrationPayload = payload;
+            if (!validateForm(form)) return;
 
-try {
+            hideAll();
+            show(final);
+            setStep(2);
 
-const res = await fetch("http://127.0.0.1:8000/api/registration/submit", {
+        };
 
-method: "POST",
-headers: {
-"Content-Type": "application/json"
-},
+    });
 
-body: JSON.stringify({
-email: payload.email
-})
 
-});
+    // Submit Registration
+    document.getElementById("submitFinal").onclick = async function () {
 
-const data = await res.json();
+        const payload = {
 
-if (!res.ok) throw new Error(data.detail);
+            first_name: sanitizeString(document.getElementById("firstName").value),
+            last_name: sanitizeString(document.getElementById("lastName").value),
+            email: sanitizeEmail(document.getElementById("emailInput").value),
+            phone_number: sanitizePhone(document.getElementById("phone").value),
+            discord_username: sanitizeString(document.getElementById("discordUsername").value),
+            university: sanitizeString(document.getElementById("university").value),
+            field_of_study: sanitizeString(document.getElementById("fieldOfStudy").value),
+            role: roleSelect.value.toUpperCase()
 
-alert("OTP sent to your email");
+        };
 
-hideAll();
-show(otpForm);
+        registrationPayload = payload;
 
-} catch (err) {
+        try {
 
-console.error(err);
-alert("Error sending OTP");
+            const res = await fetch("http://127.0.0.1:8000/api/registration/submit", {
 
-}
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
 
-};
+                body: JSON.stringify({
+                    email: payload.email
+                })
 
+            });
 
-// OTP Verify
-document.getElementById("verifyOtp").onclick = async function () {
+            const data = await res.json();
 
-const otp = [...document.querySelectorAll(".otp-input")].map(i => i.value).join("");
+            if (!res.ok) throw new Error(data.detail);
 
-try {
+            alert("OTP sent to your email");
 
-const res = await fetch("http://127.0.0.1:8000/api/registration/verify-otp", {
+            hideAll();
+            show(otpForm);
 
-method: "POST",
-headers: {
-"Content-Type": "application/json"
-},
+        } catch (err) {
 
-body: JSON.stringify({
-email: registrationPayload.email,
-otp: enteredOtp,
-form: registrationPayload
+            console.error(err);
+            alert("Error sending OTP");
 
-})
+        }
 
-});
+    };
 
-const data = await res.json();
 
-if (!res.ok) throw new Error(data.detail);
+    // OTP Verify
+    document.getElementById("verifyOtp").onclick = async function () {
 
-alert("Registration successful ✔");
+        const otp = [...document.querySelectorAll(".otp-input")].map(i => i.value).join("");
 
-window.location.reload();
+        try {
 
-} catch (err) {
+            const res = await fetch("http://127.0.0.1:8000/api/registration/verify-otp", {
 
-console.error(err);
-alert("Invalid OTP");
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
 
-}
+                body: JSON.stringify({
+                    email: registrationPayload.email,
+                    otp: enteredOtp,
+                    form: registrationPayload
 
-};
+                })
 
+            });
 
-// OTP Auto Focus
-const otpInputs = document.querySelectorAll(".otp-input");
+            const data = await res.json();
 
-otpInputs.forEach((input, index) => {
+            if (!res.ok) throw new Error(data.detail);
 
-input.addEventListener("input", function () {
+            alert("Registration successful ✔");
 
-this.value = this.value.replace(/[^0-9]/g, "");
+            window.location.reload();
 
-if (this.value && index < otpInputs.length - 1) {
-otpInputs[index + 1].focus();
-}
+        } catch (err) {
 
-});
+            console.error(err);
+            alert("Invalid OTP");
 
-input.addEventListener("keydown", function (e) {
+        }
 
-if (e.key === "Backspace" && !this.value && index > 0) {
-otpInputs[index - 1].focus();
-}
+    };
 
-});
 
-});
+    // OTP Auto Focus
+    const otpInputs = document.querySelectorAll(".otp-input");
+
+    otpInputs.forEach((input, index) => {
+
+        input.addEventListener("input", function () {
+
+            this.value = this.value.replace(/[^0-9]/g, "");
+
+            if (this.value && index < otpInputs.length - 1) {
+                otpInputs[index + 1].focus();
+            }
+
+        });
+
+        input.addEventListener("keydown", function (e) {
+
+            if (e.key === "Backspace" && !this.value && index > 0) {
+                otpInputs[index - 1].focus();
+            }
+
+        });
+
+    });
 
 });

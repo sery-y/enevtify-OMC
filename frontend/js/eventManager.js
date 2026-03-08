@@ -5,6 +5,98 @@ const container = document.querySelector(".event-container")
 const daysInput = document.getElementById("daysNumber")
 const agendaContainer = document.getElementById("agendaContainer")
 
+let currentEventId = null;
+let allEvents = [];
+
+// Load all events from API
+async function loadEvents() {
+    try {
+        const token = localStorage.getItem("token");
+        const res = await fetch("http://127.0.0.1:8000/api/admin/events", {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (!res.ok) {
+            console.error("Failed to load events");
+            return;
+        }
+
+        allEvents = await res.json();
+        renderEvents(allEvents);
+    } catch (err) {
+        console.error("Error loading events:", err);
+    }
+}
+
+// Render events list
+function renderEvents(events) {
+    container.innerHTML = "";
+
+    events.forEach((event) => {
+        const eventBox = document.createElement("div");
+        eventBox.classList.add("event-box");
+        eventBox.dataset.eventId = event.id;
+
+        eventBox.innerHTML = `
+            <h2>Event Overview</h2>
+            <p><strong>Event Name:</strong> ${event.name || "Event " + event.id}</p>
+            <p><strong>Max Participants:</strong> ${event.max_nbr_participant}</p>
+            <p><strong>Registration Period:</strong> ${event.start_registration} to ${event.end_registration}</p>
+            <p><strong>Shifts:</strong> ${event.shifts ? event.shifts.length : 0} créneaux</p>
+            <div class="event-actions">
+                <button class="edit-btn">Edit event</button>
+                <button class="delete-btn">Delete event</button>
+            </div>
+        `;
+
+        eventBox.querySelector(".edit-btn").addEventListener("click", () => {
+            loadEventForEditing(event.id);
+        });
+
+        eventBox.querySelector(".delete-btn").addEventListener("click", () => {
+            deleteEvent(event.id);
+        });
+
+        container.appendChild(eventBox);
+    });
+}
+
+// Load event details for editing
+async function loadEventForEditing(eventId) {
+    try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(`http://127.0.0.1:8000/api/admin/events/${eventId}`, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (!res.ok) {
+            console.error("Failed to load event details");
+            return;
+        }
+
+        const event = await res.json();
+        currentEventId = event.id;
+
+        // Populate form
+        document.getElementById("eventName").value = event.name || "";
+        document.getElementById("participants").value = event.max_nbr_participant;
+        document.getElementById("staff").value = event.max_nbr_staff || 0;
+        document.getElementById("mentor").value = event.max_nbr_mentor || 0;
+
+        form.style.display = "block";
+    } catch (err) {
+        console.error("Error loading event:", err);
+    }
+}
+
 // Function to add shift rows
 function addShift(containerId) {
     const container = document.getElementById(containerId);
@@ -34,38 +126,42 @@ function addShift(containerId) {
     container.appendChild(row);
 }
 
-createBtn.addEventListener("click", () => {
+// Delete event via API
+async function deleteEvent(eventId) {
+    if (!confirm("Êtes-vous sûr de vouloir supprimer cet événement?")) return;
 
-    form.style.display = "block"
+    try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(`http://127.0.0.1:8000/api/admin/events/${eventId}`, {
+            method: "DELETE",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
 
-})
+        if (!res.ok) {
+            const error = await res.json();
+            alert("Erreur: " + error.detail);
+            return;
+        }
 
-// Add event listener for the static edit button
-const staticEditBtn = document.querySelector(".event-overview .edit-btn")
-if (staticEditBtn) {
-    staticEditBtn.addEventListener("click", () => {
-        // Populate with static event data
-        document.getElementById("eventName").value = "Ideathon"
-        document.getElementById("eventDescription").value = "************"
-        document.getElementById("eventDay").value = "2026-03-06"
-        document.getElementById("eventTime").value = "17:00"
-        document.getElementById("eventType").value = "External" // Assuming default
-        document.getElementById("participants").value = "" // Not specified in static
-        document.getElementById("staff").value = "" // Not specified
-        document.getElementById("mentor").value = "" // Not specified
-        document.getElementById("daysNumber").value = "3"
-
-        // Trigger the days input change to create agenda fields
-        document.getElementById("daysNumber").dispatchEvent(new Event('input'))
-
-        // For now, leave agenda empty or add some default data
-        setTimeout(() => {
-            // Could populate with default agenda if needed
-        }, 100)
-
-        form.style.display = "block"
-    })
+        alert("Événement supprimé avec succès");
+        loadEvents();
+    } catch (err) {
+        console.error("Error deleting event:", err);
+        alert("Erreur lors de la suppression de l'événement");
+    }
 }
+
+createBtn.addEventListener("click", () => {
+    currentEventId = null;
+    document.getElementById("eventName").value = "";
+    document.getElementById("participants").value = 0;
+    document.getElementById("staff").value = 0;
+    document.getElementById("mentor").value = 0;
+    form.style.display = "block";
+});
 
 
 daysInput.addEventListener("input", () => {
@@ -104,104 +200,85 @@ daysInput.addEventListener("input", () => {
 })
 
 
-saveBtn.addEventListener("click", () => {
+saveBtn.addEventListener("click", async () => {
 
     const name = document.getElementById("eventName").value
-    const date = document.getElementById("eventDay").value
-    const time = document.getElementById("eventTime").value
-    const type = document.getElementById("eventType").value
-    const participants = document.getElementById("participants").value
-    const staff = document.getElementById("staff").value
-    const mentor = document.getElementById("mentor").value
-    const days = document.getElementById("daysNumber").value
+    const participants = parseInt(document.getElementById("participants").value) || 0
+    const staff = parseInt(document.getElementById("staff").value) || 0
+    const mentor = parseInt(document.getElementById("mentor").value) || 0
 
-
-    const titles = document.querySelectorAll(".dayTitle")
-    const descs = document.querySelectorAll(".dayDesc")
-
-    let agendaHTML = ""
-    let agendaData = []
-
-    titles.forEach((title, index) => {
-
-        agendaHTML += `
-
-            <p><strong>Day ${index + 1}:</strong> ${title.value}</p>
-            <p>${descs[index].value}</p>
-
-        `
-
-        agendaData.push({
-            title: title.value,
-            description: descs[index].value
-        })
-
-    })
-
-
-
-    const eventBox = document.createElement("div")
-
-    eventBox.classList.add("event-box")
-
-
-    eventBox.innerHTML = `
-
-    <h2>Event Overview</h2>
-
-    <p><strong>Event Name:</strong> ${name}</p>
-    <p><strong>Participants:</strong> ${participants}</p>
-    <p><strong>Date & time:</strong> ${date} , ${time}</p>
-    <p><strong>Number of days:</strong> ${days} days</p>
-    <div class="event-actions">
-        <button class="edit-btn">Edit event</button>
-        <button class="delete-btn">Delete event</button>
-    </div>
-`
-    // Store agenda data on the event box for later editing
-    eventBox.agendaData = agendaData
-    eventBox.eventData = {
-        name, date, time, type, participants, staff, mentor, days
+    if (!name) {
+        alert("Event name is required");
+        return;
     }
-    container.appendChild(eventBox)
-    form.style.display = "none"
 
-    const deleteBtn = eventBox.querySelector(".delete-btn")
-    deleteBtn.addEventListener("click", () => {
+    // Prepare event data
+    const eventData = {
+        name: name,
+        max_nbr_participant: participants,
+        max_nbr_staff: staff,
+        max_nbr_mentor: mentor,
+        start_registration: "2026-04-01T08:00:00",
+        end_registration: "2026-04-10T23:59:00",
+        shifts: [
+            {
+                day: "2026-04-14",
+                start_time: "09:00:00",
+                end_time: "12:00:00",
+                shift_type: "STAFFING"
+            },
+            {
+                day: "2026-04-14",
+                start_time: "09:00:00",
+                end_time: "12:00:00",
+                shift_type: "MENTORING"
+            }
+        ]
+    };
 
-        eventBox.remove()
+    try {
+        const token = localStorage.getItem("token");
+        const method = currentEventId ? "PUT" : "POST";
+        const endpoint = currentEventId
+            ? `http://127.0.0.1:8000/api/admin/events/${currentEventId}`
+            : "http://127.0.0.1:8000/api/admin/events";
 
-    })
-    const editBtn = eventBox.querySelector(".edit-btn")
-    editBtn.addEventListener("click", () => {
-        // Populate basic event data
-        document.getElementById("eventName").value = eventBox.eventData.name
-        document.getElementById("eventDay").value = eventBox.eventData.date
-        document.getElementById("eventTime").value = eventBox.eventData.time
-        document.getElementById("eventType").value = eventBox.eventData.type
-        document.getElementById("participants").value = eventBox.eventData.participants
-        document.getElementById("staff").value = eventBox.eventData.staff
-        document.getElementById("mentor").value = eventBox.eventData.mentor
-        document.getElementById("daysNumber").value = eventBox.eventData.days
+        const res = await fetch(endpoint, {
+            method: method,
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(eventData)
+        });
 
-        // Trigger the days input change to create agenda fields
-        document.getElementById("daysNumber").dispatchEvent(new Event('input'))
+        if (!res.ok) {
+            const error = await res.json();
+            alert("Erreur: " + error.detail);
+            return;
+        }
 
-        // Populate agenda data after a short delay to ensure fields are created
-        setTimeout(() => {
-            const titles = document.querySelectorAll(".dayTitle")
-            const descs = document.querySelectorAll(".dayDesc")
-
-            eventBox.agendaData.forEach((day, index) => {
-                if (titles[index] && descs[index]) {
-                    titles[index].value = day.title
-                    descs[index].value = day.description
-                }
-            })
-        }, 100)
-
-        eventBox.remove()
-        form.style.display = "block"
-    })
+        alert(currentEventId ? "Événement mis à jour avec succès" : "Événement créé avec succès");
+        form.style.display = "none";
+        currentEventId = null;
+        loadEvents();
+    } catch (err) {
+        console.error("Error saving event:", err);
+        alert("Erreur lors de la sauvegarde de l'événement");
+    }
 
 })
+
+// Add cancel button handler
+const cancelBtn = document.getElementById("cancelEvent");
+if (cancelBtn) {
+    cancelBtn.addEventListener("click", () => {
+        form.style.display = "none";
+        currentEventId = null;
+    });
+}
+
+// Load events when page loads
+document.addEventListener("DOMContentLoaded", () => {
+    loadEvents();
+});
